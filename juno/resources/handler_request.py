@@ -41,9 +41,6 @@ def request_authorization():
 
 
 def validate_response(juno_response):
-    # if juno_response.status_code in [403, 401] and not resend:
-    #     request_authorization()
-
     if juno_response.status_code == 204:
         return None
 
@@ -76,24 +73,47 @@ def get_resource_url():
     return RESOURCE_SERVER_URL
 
 
-def delete(end_point, data={}):
-    juno_response = requests_retry_session().delete(end_point, json=camelize(data))
-    return validate_response(juno_response)
+def request_function(method):
+    if method == "GET":
+        return requests_retry_session().get
+    elif method == "POST":
+        return requests_retry_session().post
+    elif method == "PUT":
+        return requests_retry_session().put
+    elif method == "DELETE":
+        return requests_retry_session().delete
+    elif method == "PATCH":
+        return requests_retry_session().patch
+
+
+def hook_requests(method, end_point, data):
+    juno_response = request_function(method)(end_point, json=camelize(data))
+
+    if juno_response.status_code in [401, 403]:
+        request_authorization()
+        return request_function(method)(end_point, json=camelize(data))
+
+    return juno_response
 
 
 def get(end_point, data={}):
-    juno_response = requests_retry_session().get(end_point, json=camelize(data))
-    return validate_response(juno_response)
+    return validate_response(hook_requests("GET", end_point, data))
 
 
 def post(end_point, data={}):
-    juno_response = requests_retry_session().post(end_point, json=camelize(data))
-    return validate_response(juno_response)
+    return validate_response(hook_requests("POST", end_point, data))
 
 
 def put(end_point, data={}):
-    juno_response = requests_retry_session().put(end_point, json=camelize(data))
-    return validate_response(juno_response)
+    return validate_response(hook_requests("PUT", end_point, data))
+
+
+def delete(end_point, data={}):
+    return validate_response(hook_requests("DELETE", end_point, data))
+
+
+def patch(end_point, data={}):
+    return validate_response(hook_requests("PATCH", end_point, data))
 
 
 def error(data):
