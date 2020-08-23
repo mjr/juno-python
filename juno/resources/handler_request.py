@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from juno.exceptions import JunoException, JunoInvalidCredentials
 from juno.utils import camelize, underscoreize
 
 from .requests_retry import requests_retry_session
@@ -43,6 +44,9 @@ def validate_response(juno_response):
     # if juno_response.status_code in [403, 401] and not resend:
     #     request_authorization()
 
+    if juno_response.status_code == 204:
+        return None
+
     response_json = underscoreize(juno_response.json())
     if juno_response.ok:
         return response_json
@@ -52,7 +56,7 @@ def validate_response(juno_response):
 
 def init(client_id=None, client_secret=None, resource_token=None, sandbox=True):
     if not client_id or not client_secret or not resource_token:
-        raise Exception("Invalid credentials")
+        raise JunoInvalidCredentials("Invalid credentials")
 
     global KEYS, AUTHORIZATION_URL, RESOURCE_SERVER_URL
     KEYS["client_id"] = client_id
@@ -93,8 +97,15 @@ def put(end_point, data={}):
 
 
 def error(data):
-    if "errors" in data:
-        raise Exception(data["errors"])
+    if "details" in data:
+        raise JunoException(
+            data["details"][0]["message"],
+            data["timestamp"],
+            data["details"][0]["error_code"],
+            data["status"],
+            data["error"],
+            data["path"],
+        )
 
     raise Exception(data)
 

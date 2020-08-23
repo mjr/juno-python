@@ -2,7 +2,7 @@ SLIP_PAYMENT = {
     "charge": {
         "description": "Test",
         "amount": "100",
-        "due_date": "",
+        "due_date": "2020-09-20",
         "installments": 1,
         "max_overdue_days": 0,
         "fine": 0,
@@ -13,14 +13,14 @@ SLIP_PAYMENT = {
         "payment_advance": True,
         "split": [],
     },
-    "billing": {"name": "Name Test", "document": "15026204058", "notify": False},
+    "billing": {"name": "Name Test", "document": "000000000000", "notify": False},
 }
 
 CREDIT_CARD_PAYMENT = {
     "charge": {
         "description": "Test",
         "amount": "100",
-        "due_date": "",
+        "due_date": "2020-09-17",
         "installments": 1,
         "max_overdue_days": 0,
         "fine": 0,
@@ -31,7 +31,7 @@ CREDIT_CARD_PAYMENT = {
         "payment_advance": True,
         "split": [],
     },
-    "billing": {"name": "Name Test", "document": "15026204058", "notify": False},
+    "billing": {"name": "Name Test", "document": "000000000000", "notify": False},
 }
 
 VALID_CREDIT_CARD_CHARGE_WITH_SPLIT_RULE_AMOUNT = {}
@@ -42,6 +42,6 @@ INVALID_REQUEST = {}
 
 INVALID_REQUEST = {
     "amount": "1",
-    "payment_method": BOLETO_TRANSACTION["payment_method"],
-    "customer": customer_dictionary.CUSTOMER,
+    "payment_method": "",
+    "customer": "",
 }

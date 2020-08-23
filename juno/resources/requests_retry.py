@@ -9,7 +9,7 @@ from juno import sdk
 
 
 def headers():
-    from .handler_request import KEYS
+    from .handler_request import request_authorization, KEYS
 
     if datetime.now() > KEYS["expires"]:
         request_authorization()
