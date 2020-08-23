@@ -1,4 +1,4 @@
-## juno-python
+## Juno Python Library
 <!-- [![Build status](https://travis-ci.org/mjr/juno-python.svg?branch=master)](https://secure.travis-ci.org/juno/juno-python) -->
 <!-- [![Coverage](https://coveralls.io/repos/mjr/juno-python/badge.svg?branch=master&service=github)](https://coveralls.io/github/mjr/juno-python) -->
 
