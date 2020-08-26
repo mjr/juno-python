@@ -30,3 +30,31 @@ class JunoException(Exception):
 
 class JunoInvalidCredentials(JunoException):
     pass
+
+
+class JunoNotFoundCreditCardByHash(JunoException):
+    pass
+
+
+class JunoCreditCardWithInsufficientBalance(JunoException):
+    pass
+
+
+class JunoRestrictedCreditCard(JunoException):
+    pass
+
+
+class JunoInvalidCreditCard(JunoException):
+    pass
+
+
+class JunoOperationFailed(JunoException):
+    pass
+
+
+class JunoCaptureValueGreaterThanAuthorizedValue(JunoException):
+    pass
+
+
+class JunoAlreadyRegisteredWebhookForIndicatedEvents(JunoException):
+    pass

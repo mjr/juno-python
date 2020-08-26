@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from juno.exceptions import JunoException, JunoInvalidCredentials
+from juno import exceptions
 from juno.utils import camelize, underscoreize
 
 from .requests_retry import requests_retry_session
@@ -53,7 +53,7 @@ def validate_response(juno_response):
 
 def init(client_id=None, client_secret=None, resource_token=None, sandbox=True):
     if not client_id or not client_secret or not resource_token:
-        raise JunoInvalidCredentials("Invalid credentials")
+        raise exceptions.JunoInvalidCredentials("Invalid credentials")
 
     global KEYS, AUTHORIZATION_URL, RESOURCE_SERVER_URL
     KEYS["client_id"] = client_id
@@ -118,14 +118,61 @@ def patch(end_point, data={}):
 
 def error(data):
     if "details" in data:
-        raise JunoException(
-            data["details"][0]["message"],
-            data["timestamp"],
-            data["details"][0]["error_code"],
-            data["status"],
-            data["error"],
-            data["path"],
+        raise_exception_from_error_code(
+            data["details"][0]["error_code"], data["details"][0]["message"]
         )
 
     raise Exception(data)
+
+
+capture_value_greater_than_authorized_value_error_code = "289999"
+capture_value_greater_than_authorized_value_message = (
+    "O valor informado na captura é maior que o valor autorizado"
+)
+
+not_found_credit_card_by_hash_error_code = "501008"
+
+operation_failed_error_code = "373014"
+
+invalid_credit_card_error_code = "289999"
+invalid_credit_card_message = "Não autorizado. Cartão inválido."
+
+restricted_credit_card_error_code = "289999"
+restricted_credit_card_message = None
+
+credit_card_with_insufficient_balance_error_code = "289999"
+credit_card_with_insufficient_balance_message = "Não autorizado. Saldo insuficiente."
+
+already_registered_webhook_for_indicated_events_error_code = "441009"
+
+
+def raise_exception_from_error_code(error_code, message=None):
+    if error_code == not_found_credit_card_by_hash_error_code:
+        raise exceptions.JunoNotFoundCreditCardByHash(message)
+    elif (
+        error_code == credit_card_with_insufficient_balance_error_code
+        and message == credit_card_with_insufficient_balance_message
+    ):
+        raise exceptions.JunoCreditCardWithInsufficientBalance(message)
+    elif (
+        error_code == restricted_credit_card_error_code
+        and message == restricted_credit_card_message
+    ):
+        raise exceptions.JunoRestrictedCreditCard(message)
+    elif (
+        error_code == invalid_credit_card_error_code
+        and message == invalid_credit_card_message
+    ):
+        raise exceptions.JunoInvalidCreditCard(message)
+    elif error_code == operation_failed_error_code:
+        raise exceptions.JunoOperationFailed(message)
+    elif (
+        error_code == capture_value_greater_than_authorized_value_error_code
+        and message == capture_value_greater_than_authorized_value_message
+    ):
+        raise exceptions.JunoCaptureValueGreaterThanAuthorizedValue(message)
+    elif error_code == already_registered_webhook_for_indicated_events_error_code:
+        raise exceptions.JunoAlreadyRegisteredWebhookForIndicatedEvents(message)
+    else:
+        raise exceptions.JunoException(message)
 
