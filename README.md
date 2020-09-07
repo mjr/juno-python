@@ -17,6 +17,37 @@ $ pip install juno-python
 
 * [API Guide](https://dev.juno.com.br/api/)
 
+## Quick Start Example
+
+```python
+import juno
+
+juno.init(
+    client_id="CLIENT_ID_JUNO",
+    client_secret="CLIENT_SECRET_JUNO",
+    resource_token="RESOURCE_TOKEN_JUNO",
+    sandbox=False,
+)
+
+CREDIT_CARD_CHARGE = {
+    "charge": {
+        "description": "Description",
+        "amount": "100.00",
+        "installments": 1,
+        "payment_types": ["CREDIT_CARD"],
+    },
+    "billing": {
+        "name": "Name Test",
+        "document": "00000000000", # Add a valid CPF
+        "notify": False,
+    },
+}
+
+result = juno.charge.create(CREDIT_CARD_CHARGE)
+
+print("result: " + result)
+```
+
 ## Support
 If you have any problem or suggestion please open an issue [here](https://github.com/mjr/juno-python/issues).
 
