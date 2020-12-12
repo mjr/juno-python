@@ -1,9 +1,14 @@
+import re
+
 from datetime import datetime, timedelta
 
-from juno import exceptions
-from juno.utils import camelize, underscoreize
-
+from . import exceptions
+from .charge_object import Charge
+from .error_result import ErrorResult
+from .payment_object import Payment
 from .requests_retry import requests_retry_session
+from .successful_result import SuccessfulResult
+from .utils import camelize, underscoreize
 
 
 scheme = "https"
@@ -12,6 +17,14 @@ path_authorization = "/authorization-server/oauth/token"
 KEYS = {}
 RESOURCE_SERVER_URL = ""
 AUTHORIZATION_URL = ""
+
+regex_charges = "^\/charges\/$"
+regex_charges_detail = "^\/charges\/(.*)\/$"
+regex_charges_cancelation = "^\/charges\/(.*)\/cancelation\/$"
+regex_charges_split = "^\/charges\/(.*)\/split\/$"
+regex_payments = "^\/payments\/$"
+regex_payments_capture = "^\/payments\/(.*)\/capture\/$"
+regex_payments_refunds = "^\/payments\/(.*)\/refunds\/$"
 
 
 def data_authorization():
@@ -32,7 +45,7 @@ def dict_to_keys(dictionary):
 
 def request_authorization():
     dict_to_keys(
-        validate_response(
+        validate_authorization(
             requests_retry_session(authorization=True).post(
                 AUTHORIZATION_URL, data=data_authorization()
             )
@@ -40,15 +53,72 @@ def request_authorization():
     )
 
 
-def validate_response(juno_response):
+def validate_authorization(juno_response):
     if juno_response.status_code == 204:
         return None
 
     response_json = underscoreize(juno_response.json())
     if juno_response.ok:
         return response_json
-    else:
-        return error(response_json)
+
+    return error(response_json)
+
+
+def get_data_charges(data):
+    if len(data["_embedded"]["charges"]) == 1:
+        return {"charge": Charge(data["_embedded"]["charges"][0])}
+
+    return {
+        "charges": [Charge(charge_dict) for charge_dict in data["_embedded"]["charges"]]
+    }
+
+
+def get_data_payments(data):
+    if len(data["payments"]) == 1:
+        return {"payment": Payment(data["payments"][0])}
+
+    return {"payments": [Payment(payment_dict) for payment_dict in data["payments"]]}
+
+
+def success_result(method, url, data):
+    response = data
+    if (method == "GET" and re.search(regex_charges, url)) or (
+        method == "POST" and re.search(regex_charges, url)
+    ):
+        response = get_data_charges(data)
+
+    elif method == "GET" and re.search(regex_charges_detail, url):
+        response = {"charge": Charge(data)}
+
+    elif (method == "PUT" and re.search(regex_charges_cancelation, url)) or (
+        method == "PUT" and re.search(regex_charges_split, url)
+    ):
+        return None
+
+    elif (method == "POST" and re.search(regex_payments, url)) or (
+        method == "POST" and re.search(regex_payments_capture, url)
+    ):
+        response = get_data_payments(data)
+
+    elif method == "POST" and re.search(regex_payments_refunds, url):
+        print("POST payments refunds")
+
+    return SuccessfulResult(response)
+
+
+def error_result(data):
+    return ErrorResult(data)
+
+
+def validate_response(method, end_point, juno_response):
+    response_json = underscoreize(juno_response.json())
+
+    if juno_response.ok:
+        return success_result(
+            method, f'{end_point.replace(RESOURCE_SERVER_URL, "")}/', response_json
+        )
+
+    return error_result(response_json)
 
 
 def init(client_id=None, client_secret=None, resource_token=None, sandbox=True):
@@ -97,23 +167,27 @@ def hook_requests(method, end_point, data):
 
 
 def get(end_point, data={}):
-    return validate_response(hook_requests("GET", end_point, data))
+    return validate_response("GET", end_point, hook_requests("GET", end_point, data))
 
 
 def post(end_point, data={}):
-    return validate_response(hook_requests("POST", end_point, data))
+    return validate_response("POST", end_point, hook_requests("POST", end_point, data))
 
 
 def put(end_point, data={}):
-    return validate_response(hook_requests("PUT", end_point, data))
+    return validate_response("PUT", end_point, hook_requests("PUT", end_point, data))
 
 
 def delete(end_point, data={}):
-    return validate_response(hook_requests("DELETE", end_point, data))
+    return validate_response(
+        "DELETE", end_point, hook_requests("DELETE", end_point, data)
+    )
 
 
 def patch(end_point, data={}):
-    return validate_response(hook_requests("PATCH", end_point, data))
+    return validate_response(
+        "PATCH", end_point, hook_requests("PATCH", end_point, data)
+    )
 
 
 def error(data):
