@@ -33,19 +33,22 @@ CREDIT_CARD_CHARGE = {
     "charge": {
         "description": "Description",
         "amount": "100.00",
-        "installments": 1,
+        "references": [""],
         "payment_types": ["CREDIT_CARD"],
     },
     "billing": {
         "name": "Name Test",
         "document": "00000000000", # Add a valid CPF
-        "notify": False,
     },
 }
 
 result = juno.charge.create(CREDIT_CARD_CHARGE)
 
-print("result: " + result)
+if result.is_success:
+    print(f"Success: {result.charge.id}")
+else:
+    for error in result.errors:
+        print(f"Error: {error}")
 ```
 
 ## Support
