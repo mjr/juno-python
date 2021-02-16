@@ -29,7 +29,6 @@ juno.init(
     sandbox=False,
 )
 
-```python
 result_charge = juno.charge.create(
     {
         "charge": {
