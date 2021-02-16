@@ -44,6 +44,7 @@ result_charge = juno.charge.create(
         },
     }
 )
+
 if result_charge.is_success:
     result_payment = juno.payment.create(
         {
