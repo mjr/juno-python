@@ -10,7 +10,7 @@ __author_email__ = "manaiajr.23@gmail.com"
 
 setup(
     name="juno-python",
-    version="0.2.2",
+    version="0.2.3",
     url="https://github.com/mjr/juno-python",
     author=__author__,
     author_email=__author_email__,
