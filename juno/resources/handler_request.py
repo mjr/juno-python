@@ -112,7 +112,7 @@ def error_result(data):
 
 
 def validate_response(method, end_point, juno_response):
-    if response_json.status_code == 204:
+    if juno_response.status_code == 204:
         return success_result(
             method, f'{end_point.replace(RESOURCE_SERVER_URL, "")}/', None
         )
