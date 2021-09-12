@@ -22,7 +22,7 @@ def find_webhook_by_id(webhook_id):
 
 def update_webhook(webhook_id, dictionary):
     return handler_request.patch(
-        charge_routes.get_update_webhook_url(webhook_id), dictionary
+        notification_routes.get_update_webhook_url(webhook_id), dictionary
     )
 
 
