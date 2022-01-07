@@ -98,7 +98,7 @@ def get_data_plans(data):
 
 def get_data_subscriptions(data):
     if len(data["_embedded"]["subscriptions"]) == 1:
-        return {"subscription": Plan(data["_embedded"]["subscriptions"][0])}
+        return {"subscription": Subscription(data["_embedded"]["subscriptions"][0])}
 
     return {
         "subscriptions": [Subscription(subscription_dict) for subscription_dict in data["_embedded"]["subscriptions"]]
