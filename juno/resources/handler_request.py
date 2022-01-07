@@ -6,6 +6,8 @@ from .. import exceptions
 from ..charge_object import Charge
 from ..error_result import ErrorResult
 from ..payment_object import Payment
+from ..plan_object import Plan
+from ..subscription_object import Subscription
 from ..successful_result import SuccessfulResult
 from ..utils import camelize, underscoreize
 
@@ -26,6 +28,10 @@ regex_charges_split = "^\/charges\/(.*)\/split\/$"
 regex_payments = "^\/payments\/$"
 regex_payments_capture = "^\/payments\/(.*)\/capture\/$"
 regex_payments_refunds = "^\/payments\/(.*)\/refunds\/$"
+regex_plans = "^\/plans\/$"
+regex_plans_detail = "^\/plans\/(.*)\/$"
+regex_subscriptions = "^\/subscriptions\/$"
+regex_subscriptions_detail = "^\/subscriptions\/(.*)\/$"
 
 
 def data_authorization():
@@ -81,6 +87,24 @@ def get_data_payments(data):
     return {"payments": [Payment(payment_dict) for payment_dict in data["payments"]]}
 
 
+def get_data_plans(data):
+    if len(data["_embedded"]["plans"]) == 1:
+        return {"plan": Plan(data["_embedded"]["plans"][0])}
+
+    return {
+        "plans": [Plan(plan_dict) for plan_dict in data["_embedded"]["plans"]]
+    }
+
+
+def get_data_subscriptions(data):
+    if len(data["_embedded"]["subscriptions"]) == 1:
+        return {"subscription": Plan(data["_embedded"]["subscriptions"][0])}
+
+    return {
+        "subscriptions": [Subscription(subscription_dict) for subscription_dict in data["_embedded"]["subscriptions"]]
+    }
+
+
 def success_result(method, url, data):
     response = data
     if (method == "GET" and re.search(regex_charges, url)) or (
@@ -103,6 +127,22 @@ def success_result(method, url, data):
 
     elif method == "POST" and re.search(regex_payments_refunds, url):
         print("POST payments refunds")
+
+    elif (method == "GET" and re.search(regex_plans, url)) or (
+        method == "POST" and re.search(regex_plans, url)
+    ):
+        response = get_data_plans(data)
+
+    elif method == "GET" and re.search(regex_plans_detail, url):
+        response = {"plan": Plan(data)}
+
+    elif (method == "GET" and re.search(regex_subscriptions, url)) or (
+        method == "POST" and re.search(regex_subscriptions, url)
+    ):
+        response = get_data_subscriptions(data)
+
+    elif method == "GET" and re.search(regex_subscriptions_detail, url):
+        response = {"subscription": Subscription(data)}
 
     return SuccessfulResult(response)
 
