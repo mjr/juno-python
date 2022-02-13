@@ -6,8 +6,8 @@ def create(dictionary):
     return handler_request.post(plan_routes.get_base_url(), dictionary)
 
 
-def find_all(size=10):
-    return handler_request.get(f"{plan_routes.get_base_url()}/?pageSize={size}")
+def find_all():
+    return handler_request.get(plan_routes.get_base_url())
 
 
 def find_by_id(plan_id):

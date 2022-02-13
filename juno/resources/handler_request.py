@@ -90,21 +90,25 @@ def get_data_payments(data):
     return {"payments": [Payment(payment_dict) for payment_dict in data["payments"]]}
 
 
-def get_data_plans(data):
-    if len(data["_embedded"]["plans"]) == 1:
+def get_data_plans(data, method):
+    if "_embedded" not in data:
+        return {"plans": []}
+
+    if len(data["_embedded"]["plans"]) == 1 and method == "POST":
         return {"plan": Plan(data["_embedded"]["plans"][0])}
 
-    return {
-        "plans": [Plan(plan_dict) for plan_dict in data["_embedded"]["plans"]]
-    }
+    return {"plans": [Plan(plan_dict) for plan_dict in data["_embedded"]["plans"]]}
 
 
-def get_data_subscriptions(data):
-    if len(data["_embedded"]["subscriptions"]) == 1:
+def get_data_subscriptions(data, method):
+    if len(data["_embedded"]["subscriptions"]) == 1 and method == "POST":
         return {"subscription": Subscription(data["_embedded"]["subscriptions"][0])}
 
     return {
-        "subscriptions": [Subscription(subscription_dict) for subscription_dict in data["_embedded"]["subscriptions"]]
+        "subscriptions": [
+            Subscription(subscription_dict)
+            for subscription_dict in data["_embedded"]["subscriptions"]
+        ]
     }
 
 
@@ -134,7 +138,7 @@ def success_result(method, url, data):
     elif (method == "GET" and re.search(regex_plans, url)) or (
         method == "POST" and re.search(regex_plans, url)
     ):
-        response = get_data_plans(data)
+        response = get_data_plans(data, method)
 
     elif method == "GET" and re.search(regex_plans_detail, url):
         response = {"plan": Plan(data)}
@@ -142,7 +146,7 @@ def success_result(method, url, data):
     elif (method == "GET" and re.search(regex_subscriptions, url)) or (
         method == "POST" and re.search(regex_subscriptions, url)
     ):
-        response = get_data_subscriptions(data)
+        response = get_data_subscriptions(data, method)
 
     elif method == "GET" and re.search(regex_subscriptions_detail, url):
         response = {"subscription": Subscription(data)}

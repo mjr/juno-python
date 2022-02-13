@@ -11,20 +11,30 @@ def find_all():
 
 
 def find_by_id(subscription_id):
-    return handler_request.get(subscription_routes.get_specific_subscription_by_id_url(subscription_id))
+    return handler_request.get(
+        subscription_routes.get_specific_subscription_by_id_url(subscription_id)
+    )
 
 
 def deactivation(subscription_id):
-    return handler_request.post(subscription_routes.get_deactivation_subscription_url(subscription_id))
+    return handler_request.post(
+        subscription_routes.get_deactivation_subscription_url(subscription_id)
+    )
 
 
 def activation(subscription_id):
-    return handler_request.post(subscription_routes.get_activation_subscription_url(subscription_id))
+    return handler_request.post(
+        subscription_routes.get_activation_subscription_url(subscription_id)
+    )
 
 
 def cancelation(subscription_id):
-    return handler_request.post(subscription_routes.get_cancelation_subscription_url(subscription_id))
+    return handler_request.post(
+        subscription_routes.get_cancelation_subscription_url(subscription_id)
+    )
 
 
 def completion(subscription_id):
-    return handler_request.post(subscription_routes.get_completion_subscription_url(subscription_id))
+    return handler_request.post(
+        subscription_routes.get_completion_subscription_url(subscription_id)
+    )
