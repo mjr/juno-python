@@ -91,9 +91,6 @@ def get_data_payments(data):
 
 
 def get_data_plans(data, method):
-    if "_embedded" not in data:
-        return {"plans": []}
-
     if len(data["_embedded"]["plans"]) == 1 and method == "POST":
         return {"plan": Plan(data["_embedded"]["plans"][0])}
 
