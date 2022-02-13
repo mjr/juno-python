@@ -74,10 +74,55 @@ else:
     print(result_charge.errors)
 ```
 
+### List Charges
+```python
+response = juno.charge.find_all(
+    query_params={
+        "created_on_start": "2022-02-13", "created_on_end": "2022-02-14", "order_asc": False
+    }
+)
+
+# You can pass the argument with keyword or not
+# ... charge.find_all({"created_on_start": "2022-02-13", ...})
+
+for charge in response.charges:
+    print(charge)
+```
+
+### Detail Charge
+```python
+response = juno.charge.find_by_id("chr_1EECDF55648943D78BDFC6D852E19266")
+print(response.charge)
+```
+
+### Cancel Charge
+```python
+response = juno.charge.cancelation("chr_1EECDF55648943D78BDFC6D852E19266")
+print(response)
+```
+
 ### Capture Delayed
 ```python
 # ...
+juno.payment.capture(result_payment.payment.id, {"charge_id": result_charge.charge.id})
+```
+
+### Partial Capture Delayed
+```python
+# ...
 juno.payment.capture(result_payment.payment.id, {"charge_id": result_charge.charge.id, "amount": "100.00"})
+```
+
+### Refund Payment
+```python
+response = juno.payment.refund("pay_879D6006555C3309E4504C63B743BF59")
+print(response)
+```
+
+### Partial Refund Payment
+```python
+response = juno.payment.refund("pay_879D6006555C3309E4504C63B743BF59", {"amount": "10.00"})
+print(response)
 ```
 
 ## Support
