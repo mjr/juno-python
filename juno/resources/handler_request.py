@@ -65,8 +65,11 @@ def validate_authorization(juno_response):
     return error(response_json)
 
 
-def get_data_charges(data):
-    if len(data["_embedded"]["charges"]) == 1:
+def get_data_charges(data, method):
+    if "_embedded" not in data:
+        return {"charges": []}
+
+    if len(data["_embedded"]["charges"]) == 1 and method == "POST":
         return {"charge": Charge(data["_embedded"]["charges"][0])}
 
     return {
@@ -86,7 +89,7 @@ def success_result(method, url, data):
     if (method == "GET" and re.search(regex_charges, url)) or (
         method == "POST" and re.search(regex_charges, url)
     ):
-        response = get_data_charges(data)
+        response = get_data_charges(data, method)
 
     elif method == "GET" and re.search(regex_charges_detail, url):
         response = {"charge": Charge(data)}
@@ -163,11 +166,15 @@ def request_function(method):
 
 
 def hook_requests(method, end_point, data):
-    juno_response = request_function(method)(end_point, json=camelize(data))
+    payload = {"json": camelize(data)}
+    if method == "GET":
+        payload = {"params": camelize(data)}
+
+    juno_response = request_function(method)(end_point, **payload)
 
     if juno_response.status_code in [401, 403]:
         request_authorization()
-        return request_function(method)(end_point, json=camelize(data))
+        return request_function(method)(end_point, **payload)
 
     return juno_response
 
@@ -191,9 +198,7 @@ def delete(end_point, data={}):
 
 
 def patch(end_point, data={}):
-    return validate_response(
-        "PATCH", end_point, hook_requests("PATCH", end_point, data)
-    )
+    return validate_response("PATCH", end_point, hook_requests("PATCH", end_point, data))
 
 
 def error(data):
@@ -255,4 +260,3 @@ def raise_exception_from_error_code(error_code, message=None):
         raise exceptions.JunoAlreadyRegisteredWebhookForIndicatedEvents(message)
     else:
         raise exceptions.JunoException(message)
-
