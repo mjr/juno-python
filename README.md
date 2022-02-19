@@ -74,6 +74,17 @@ else:
     print(result_charge.errors)
 ```
 
+### Tokenize Card
+```python
+result_card = juno.card.tokenization({"credit_card_hash": "39612e90-ae60-4fdd-a437-fcff56c41bea"})
+
+if result_card.is_success:
+    print(f"Attached card id: {result_card.credit_card_id}")
+    print(f".... {result_card.last4_card_number} ({result_card.expiration_month}/{result_card.expiration_year})")
+else:
+    print(result_card.errors)
+```
+
 ### List Charges
 ```python
 response = juno.charge.find_all(
